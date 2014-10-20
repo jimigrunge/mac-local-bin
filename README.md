@@ -1,4 +1,4 @@
-# Mac Loca Bin #
+# Mac Local Bin #
 
 This is a repository for utility scripts used on my Macs.
 
@@ -16,4 +16,3 @@ This is a repository for utility scripts used on my Macs.
 * Database configuration
 * How to run tests
 * Deployment instructions
-
