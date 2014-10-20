@@ -19,11 +19,14 @@ This is just a collection of utility scripts used on my Macs.
 ### Get the code
 Checkout repository to your `/Users/<username>` directory:
 
-    $ git clone https://jimigrunge@bitbucket.org/jimigrunge/mac-local-bin.git
+    $ cd ~
+    $ mkdir bin
+    $ cd bin
+    $ git clone https://jimigrunge@bitbucket.org/jimigrunge/mac-local-bin.git .
 
 ### Make files executable: 
 
-    $ chmod -R u+x ./mack-local-bin
+    $ chmod -R u+x ~/bin
 
 ### Add path to your PATH. 
 The file to edit may differ on your machine, please check your documentation.
