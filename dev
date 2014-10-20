@@ -1,0 +1,144 @@
+#!/bin/bash
+############################################################################
+# 
+# Start and Stop the development environment
+# 
+# @author James Grundner <james@jgrundner.com>
+# v1.0 November 10, 2013
+# @version v2.1 October 19, 2014
+# 
+############################################################################
+#                User Definable                                            #
+############################################################################
+APACHECTL="/usr/sbin/apachectl"
+APACHEUSR="sudo"
+HTTPPASSWORD="rocker"
+MYSQL_INIT_SCRIPT=mysql.server
+ARGV=$1
+PGSQL_INIT_SCRIPT='pg_ctl -D /usr/local/var/postgres -l /var/log/psql.log'
+PHP_EXE=/usr/local/bin/php
+############################################################################
+#                End of User Definable                                     #
+############################################################################
+
+stop(){
+    mysql_stop
+    postgres_stop
+    RETVAL=$?
+}
+
+start(){
+    mysql_start
+    postgres_start
+    RETVAL=$?
+}
+
+restart(){
+    stop
+    start
+}
+
+mysql_start(){
+    echo "$MYSQL_INIT_SCRIPT start"
+    $MYSQL_INIT_SCRIPT start
+    sleep 1
+}
+
+mysql_stop(){
+    echo "$MYSQL_INIT_SCRIPT stop"
+    $MYSQL_INIT_SCRIPT stop
+    sleep 1
+}
+
+postgres_start(){
+    echo 'Starting Postgresql'
+    echo "$PGSQL_INIT_SCRIPT start"
+    $PGSQL_INIT_SCRIPT start
+}
+
+postgres_stop(){
+    echo 'Shutting down Postgresql'
+    echo "$PGSQL_INIT_SCRIPT -m fast stop"
+    $PGSQL_INIT_SCRIPT -m fast stop
+}
+
+server(){
+    expect -c "
+        spawn $APACHEUSR $APACHECTL $ARGV
+        expect {
+            "*Password:*" { send $HTTPPASSWORD\r\n; interact }
+            eof { exit }
+        }
+        exit
+    "
+    sleep 1
+}
+
+case "$ARGV" in
+    start|stop|restart)
+        server
+        $ARGV
+    ;;
+    server)
+        ARGV=$2
+        server
+    ;;
+    use53)
+        brew unlink php55 && brew link php53
+        ARGV=restart
+        server
+    ;;
+    use55)
+        brew unlink php53 && brew link php55
+        ARGV=restart
+        server
+    ;;
+    php)
+        $PHP_EXE -v
+    ;;
+    postgres)
+        case "$2" in
+            stop)
+                postgres_stop ;;
+            start)
+                postgres_start ;;
+            restart)
+                postgres_stop
+                postgres_start ;;
+        esac
+    ;;
+    mysql) 
+        case "$2" in
+            stop)
+                mysql_stop ;;
+            start)
+                mysql_start ;;
+            restart)
+                mysql_stop
+                mysql_start ;;
+        esac
+    ;;
+    *)
+        clear
+        echo $"Usage: $0 
+    Control the whole development environment at once
+            stop      -- Stop the whole DEV environment
+            start     -- Start the whole DEV environment
+            restart   -- Restart the whole DEV environment
+
+    Switching PHP versions. Automatically restarts web server
+            use53       -- Switch to php 5.3
+            use55       -- Switch to php 5.5
+            php         -- Display which version is linked
+
+    Controlling individual components 
+            postgres  [stop|start|restart]  -- PostgreSQL
+            mysql     [stop|start|restart]  -- MySQL
+            server    [stop|start|restart]  -- Apache
+        "
+        exit 1;;
+esac
+
+exit 0
+
+# Voila, Nous sont finis!
