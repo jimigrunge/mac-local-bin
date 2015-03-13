@@ -5,7 +5,11 @@ This is just a collection of utility scripts used on my Macs.
 ## What is this repository for?
 
 * Things I get tired of typing out on the command line
-* Version 2.1
+* This helps to control my development environment
+	* Switching PHP versions
+	* Starting and stoping MySQL and PostgreSQL
+	* Starting and stoping Apache
+* Version 3.0
 
 ## Scripts
 
@@ -47,11 +51,16 @@ Add this line
 
 ## Changelog ##
 
+### 3.0
+* Moved to OSX Yosemite
+* Dev setup is now based on [ALAN IVEY's setup](https://echo.co/blog/os-x-1010-yosemite-local-development-environment-apache-php-and-mysql-homebrew)
+* Adding my setup script. 
+	* This is Alan's instructions modified with my unique requirements
+
 ### 2.1
 * Removed PHP 5.2 support
 
 ### 2.0
-
 * Changes for OSX Mavericks and Homebrew development environment
 
 ### 1.0 ###
