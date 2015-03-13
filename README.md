@@ -53,7 +53,7 @@ Add this line
 
 ### 3.1
 * Moved to OSX Yosemite
-* Dev setup is now based on [ALAN IVEY's setup](https://echo.co/blog/os-x-1010-yosemite-local-development-environment-apache-php-and-mysql-homebrew)
+* Dev setup is now based on <a href="https://echo.co/blog/os-x-1010-yosemite-local-development-environment-apache-php-and-mysql-homebrew" target="_blank">ALAN IVEY's setup</a>
 * Adding my setup script. 
 	* This is Alan's instructions modified with my unique requirements
 
