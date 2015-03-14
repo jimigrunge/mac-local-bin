@@ -61,14 +61,18 @@ EOF
 ```	
 
 ``sed -i '' 's/^#[[:space:]]*\(innodb_buffer_pool_size\)/\1/' $(brew --prefix)/etc/my.cnf``
+
 ``ln -sfv $(brew --prefix mysql)/homebrew.mxcl.mysql.plist ~/Library/LaunchAgents/``
 
 
 ##Apache install
 
 ``sudo launchctl unload /System/Library/LaunchDaemons/org.apache.httpd.plist 2>/dev/null``
+
 ``brew install -v homebrew/apache/httpd22 --with-homebrew-openssl --with-mpm-event``
+
 ``brew install -v homebrew/apache/mod_fastcgi --with-homebrew-httpd22``
+
 ``sed -i '' '/fastcgi_module/d' $(brew --prefix)/etc/apache2/2.2/httpd.conf``
 
 **This is all one command, so copy and paste the entire code block at once:**
@@ -282,6 +286,7 @@ EOF'
 ####PHP 5.6
 
 ``brew install php56-imagick``
+
 ``brew reinstall -v homebrew/php/php56 --with-fpm --with-postgresql --with-imap --with-homebrew-openssl --with-apache``
 
 ```shell
@@ -289,11 +294,13 @@ EOF'
 ```
 
 ``chmod -R ug+w $(brew --prefix php56)/lib/php``
+
 ``ln -sfv $(brew --prefix php56)/\*.plist \~/Library/LaunchAgents/``
 
 ####PHP 5.5
 
 ``brew install php55-imagick``
+
 ``brew reinstall -v homebrew/php/php55 --with-fpm --with-postgresql --with-imap --with-homebrew-openssl --with-apache``
 
 ```shell
@@ -301,7 +308,9 @@ EOF'
 ```
 
 ``sudo chown -R \$USER $(brew --prefix php55)/lib/php``
+
 ``chmod -R ug+w $(brew --prefix php55)/lib/php``
+
 ``ln -sfv $(brew --prefix php55)/\*.plist \~/Library/LaunchAgents/``
 
 ####PHP 5.3
@@ -314,29 +323,45 @@ homebrew/php/php53 --with-fpm --with-postgresql --with-imap --with-homebrew-open
 ```
 
 ``sudo chown -R \$USER $(brew --prefix php53)/lib/php``
+
 ``chmod -R ug+w $(brew --prefix php53)/lib/php``
+
 ``ln -sfv $(brew --prefix php53)/\*.plist \~/Library/LaunchAgents/``
 
 ##Install phing
 
 ``cd /usr/local/Cellar/php55/5.5.XX/bin/``
+
 ``sudo pear channel-discover pear.phing.info``
+
 ``sudo pear install --alldeps phing/phing``
+
 ``cd /usr/local/Cellar/php55/5.5.XX/bin``
+
 ``sudo chown \$USER phing``
+
 ``cd /usr/local/bin``
+
 ``ln -s ../Cellar/php55/5.5.XX/bin/phing``
 
 ##Install DNSMASQ and configure for .dev
 
 ``brew install -v dnsmasq``
+
 ``echo 'address=/.dev/127.0.0.1' > $(brew --prefix)/etc/dnsmasq.conf``
+
 ``echo 'listen-address=127.0.0.1' >> $(brew --prefix)/etc/dnsmasq.conf``
+
 ``echo 'port=35353' >> $(brew --prefix)/etc/dnsmasq.conf``
+
 ``ln -sfv $(brew --prefix dnsmasq)/homebrew.mxcl.dnsmasq.plist ~/Library/LaunchAgents``
+
 ``launchctl load -Fw ~/Library/LaunchAgents/homebrew.mxcl.dnsmasq.plist``
+
 ``sudo mkdir -v /etc/resolver``
+
 ``sudo bash -c 'echo "nameserver 127.0.0.1" > /etc/resolver/dev'``
+
 ``sudo bash -c 'echo "port 35353" >> /etc/resolver/dev'``
 
 To test, the command ``ping -c 3 fakedomainthatisntreal.dev`` should
@@ -347,25 +372,36 @@ turning WiFi off and on
 Place the following in you .zshrc/.bashrc/.profile file in your home directory:
 
 ``export PATH="/Users/\$USER/bin:/usr/local/sbin:\$PATH"``
+
 ``export PATH="\$PATH:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"``
 
 ##Start Up Commands
 
 ``launchctl load -Fw ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist``
+
 ``launchctl load -Fw ~/Library/LaunchAgents/homebrew.mxcl.mysql.plist``
+
 ``launchctl load -Fw ~/Library/LaunchAgents/homebrew.mxcl.httpd22.plist``
+
 ``launchctl load -Fw ~/Library/LaunchAgents/homebrew.mxcl.php56.plist``
+
 ``launchctl load -Fw ~/Library/LaunchAgents/homebrew.mxcl.php55.plist``
+
 ``launchctl load -Fw ~/Library/LaunchAgents/homebrew.mxcl.php53.plist``
 
 
 ##Shutdown Commands
 
 ``launchctl unload \~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist``
+
 ``launchctl unload \~/Library/LaunchAgents/homebrew.mxcl.mysql.plist``
+
 ``launchctl unload \~/Library/LaunchAgents/homebrew.mxcl.httpd22.plist``
+
 ``launchctl unload \~/Library/LaunchAgents/homebrew.mxcl.php56.plist``
+
 ``launchctl unload \~/Library/LaunchAgents/homebrew.mxcl.php55.plist``
+
 ``launchctl unload \~/Library/LaunchAgents/homebrew.mxcl.php53.plist``
 
 
@@ -374,27 +410,39 @@ Place the following in you .zshrc/.bashrc/.profile file in your home directory:
 ####— PHP56
 
 ``brew unlink php55 && brew unlink php53``
+
 ``brew link php56``
+
 ``launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.php55.plist``
+
 ``launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.php53.plist``
+
 ``launchctl load -Fw ~/Library/LaunchAgents/homebrew.mxcl.php56.plist``
 
 
 ####— PHP55
 
 ``brew unlink php56 && brew unlink php53``
+
 ``brew link php55``
+
 ``launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.php56.plist``
+
 ``launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.php53.plist``
+
 ``launchctl load -Fw ~/Library/LaunchAgents/homebrew.mxcl.php55.plist``
 
 
 ####— PHP53
 
 ``brew unlink php55 && brew unlink php56``
+
 ``brew link php53``
+
 ``launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.php55.plist``
+
 ``launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.php56.plist``
+
 ``launchctl load -Fw ~/Library/LaunchAgents/homebrew.mxcl.php53.plist``
 
 ##END SETUP
