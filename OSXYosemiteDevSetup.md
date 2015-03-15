@@ -8,7 +8,7 @@ Based on [ALAN IVEY's setup](https://echo.co/blog/os-x-1010-yosemite-local-devel
 
 ##Install HomeBrew
 
-``ruby -e "\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"``
+``ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"``
 
 ##Install GIT, if missing
 
@@ -50,7 +50,7 @@ ln -s ImageMagick-6 ImageMagick
 
 **MySQL Configs for performance**
 
-``cp -v \$(brew --prefix mysql)/support-files/my-default.cnf $(brew --prefix)/etc/my.cnf``
+``cp -v $(brew --prefix mysql)/support-files/my-default.cnf $(brew --prefix)/etc/my.cnf``
 
 ```
 cat >> $(brew --prefix)/etc/my.cnf <<'EOF'
@@ -243,7 +243,7 @@ openssl req \
 
 ```
 
-``ln -sfv \$(brew --prefix httpd22)/homebrew.mxcl.httpd22.plist ~/Library/LaunchAgents``
+``ln -sfv $(brew --prefix httpd22)/homebrew.mxcl.httpd22.plist ~/Library/LaunchAgents``
 
 ``launchctl load -Fw ~/Library/LaunchAgents/homebrew.mxcl.httpd22.plist``
 
@@ -293,9 +293,11 @@ EOF'
 (export USERHOME=$(dscl . -read /Users/`whoami` NFSHomeDirectory | awk -F"\: " '{print $2}') ; sed -i '-default' -e 's|^;\(date\.timezone[[:space:]]*=\).*|\1 \"'$(sudo systemsetup -gettimezone|awk -F"\: " '{print $2}')'\"|; s|^\(memory_limit[[:space:]]*=\).*|\1 512M|; s|^\(post_max_size[[:space:]]*=\).*|\1 200M|; s|^\(upload_max_filesize[[:space:]]*=\).*|\1 100M|; s|^\(default_socket_timeout[[:space:]]*=\).*|\1 600|; s|^\(max_execution_time[[:space:]]*=\).*|\1 300|; s|^\(max_input_time[[:space:]]*=\).*|\1 600|; $a\'$'\n''\'$'\n''; PHP Error log\'$'\n''error_log = '$USERHOME'/Sites/logs/php-error_log'$'\n' $(brew --prefix)/etc/php/5.6/php.ini)
 ```
 
+``sudo chown -R $USER $(brew --prefix php56)/lib/php``
+
 ``chmod -R ug+w $(brew --prefix php56)/lib/php``
 
-``ln -sfv $(brew --prefix php56)/\*.plist \~/Library/LaunchAgents/``
+``ln -sfv $(brew --prefix php56)/*.plist ~/Library/LaunchAgents/``
 
 ####PHP 5.5
 
@@ -307,11 +309,11 @@ EOF'
 (export USERHOME=$(dscl . -read /Users/`whoami` NFSHomeDirectory | awk -F"\: " '{print $2}') ; sed -i '-default' -e 's|^;\(date\.timezone[[:space:]]*=\).*|\1 \"'$(sudo systemsetup -gettimezone|awk -F"\: " '{print $2}')'\"|; s|^\(memory_limit[[:space:]]*=\).*|\1 512M|; s|^\(post_max_size[[:space:]]*=\).*|\1 200M|; s|^\(upload_max_filesize[[:space:]]*=\).*|\1 100M|; s|^\(default_socket_timeout[[:space:]]*=\).*|\1 600|; s|^\(max_execution_time[[:space:]]*=\).*|\1 300|; s|^\(max_input_time[[:space:]]*=\).*|\1 600|; $a\'$'\n''\'$'\n''; PHP Error log\'$'\n''error_log = '$USERHOME'/Sites/logs/php-error_log'$'\n' $(brew --prefix)/etc/php/5.5/php.ini)
 ```
 
-``sudo chown -R \$USER $(brew --prefix php55)/lib/php``
+``sudo chown -R $USER $(brew --prefix php55)/lib/php``
 
 ``chmod -R ug+w $(brew --prefix php55)/lib/php``
 
-``ln -sfv $(brew --prefix php55)/\*.plist \~/Library/LaunchAgents/``
+``ln -sfv $(brew --prefix php55)/*.plist ~/Library/LaunchAgents/``
 
 ####PHP 5.3
 
@@ -322,11 +324,11 @@ homebrew/php/php53 --with-fpm --with-postgresql --with-imap --with-homebrew-open
 (export USERHOME=$(dscl . -read /Users/`whoami` NFSHomeDirectory | awk -F"\: " '{print $2}') ; sed -i '-default' -e 's|^;\(date\.timezone[[:space:]]*=\).*|\1 \"'$(sudo systemsetup -gettimezone|awk -F"\: " '{print $2}')'\"|; s|^\(short_open_tag[[:space:]]*=\).*|\1 On|; s|^\(memory_limit[[:space:]]*=\).*|\1 512M|; s|^\(post_max_size[[:space:]]*=\).*|\1 200M|; s|^\(upload_max_filesize[[:space:]]*=\).*|\1 100M|; s|^\(default_socket_timeout[[:space:]]*=\).*|\1 600|; s|^\(max_execution_time[[:space:]]*=\).*|\1 300|; s|^\(max_input_time[[:space:]]*=\).*|\1 600|; $a\'$'\n''\'$'\n''; PHP Error log\'$'\n''error_log = '$USERHOME'/Sites/logs/php-error_log'$'\n' $(brew --prefix)/etc/php/5.3/php.ini)
 ```
 
-``sudo chown -R \$USER $(brew --prefix php53)/lib/php``
+``sudo chown -R $USER $(brew --prefix php53)/lib/php``
 
 ``chmod -R ug+w $(brew --prefix php53)/lib/php``
 
-``ln -sfv $(brew --prefix php53)/\*.plist \~/Library/LaunchAgents/``
+``ln -sfv $(brew --prefix php53)/*.plist ~/Library/LaunchAgents/``
 
 ##Install phing
 
@@ -338,7 +340,7 @@ homebrew/php/php53 --with-fpm --with-postgresql --with-imap --with-homebrew-open
 
 ``cd /usr/local/Cellar/php55/5.5.XX/bin``
 
-``sudo chown \$USER phing``
+``sudo chown $USER phing``
 
 ``cd /usr/local/bin``
 
@@ -371,9 +373,9 @@ turning WiFi off and on
 ##Paths
 Place the following in you .zshrc/.bashrc/.profile file in your home directory:
 
-``export PATH="/Users/\$USER/bin:/usr/local/sbin:\$PATH"``
+``export PATH="/Users/$USER/bin:/usr/local/sbin:$PATH"``
 
-``export PATH="\$PATH:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"``
+``export PATH="$PATH:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"``
 
 ##Start Up Commands
 
@@ -392,17 +394,17 @@ Place the following in you .zshrc/.bashrc/.profile file in your home directory:
 
 ##Shutdown Commands
 
-``launchctl unload \~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist``
+``launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist``
 
-``launchctl unload \~/Library/LaunchAgents/homebrew.mxcl.mysql.plist``
+``launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.mysql.plist``
 
-``launchctl unload \~/Library/LaunchAgents/homebrew.mxcl.httpd22.plist``
+``launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.httpd22.plist``
 
-``launchctl unload \~/Library/LaunchAgents/homebrew.mxcl.php56.plist``
+``launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.php56.plist``
 
-``launchctl unload \~/Library/LaunchAgents/homebrew.mxcl.php55.plist``
+``launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.php55.plist``
 
-``launchctl unload \~/Library/LaunchAgents/homebrew.mxcl.php53.plist``
+``launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.php53.plist``
 
 
 ##Swapping PHP versions
