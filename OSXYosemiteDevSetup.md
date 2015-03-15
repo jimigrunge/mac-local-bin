@@ -447,7 +447,7 @@ Place the following in you .zshrc/.bashrc/.profile file in your home directory:
 
 ##END SETUP
 
-###NOTES**</span>
+###NOTES
 
 ####To check log files for error output
 
@@ -467,7 +467,7 @@ Place the following in you .zshrc/.bashrc/.profile file in your home directory:
 
 **DNSMasq:**
 
-* no log file, run this in terminal: 
+* No log file, run this in terminal to watch output: 
 * ``dnsmasq --keep-in-foreground ``
 
 
