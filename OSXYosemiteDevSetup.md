@@ -471,13 +471,19 @@ Place the following in you .zshrc/.bashrc/.profile file in your home directory:
 * ``dnsmasq --keep-in-foreground ``
 
 
+
+
 **If you don't want/need launchctl for PostgreSQL, you can just run:**
 
-``postgres -D /usr/local/var/postgres``
+``pg_ctl -D /usr/local/var/postgres -l logfile start``
 
-**f you don't want/need launchctl for MySQL, you can just run:**
+``pg_ctl -D /usr/local/var/postgres -l logfile -m fast stop``
+
+**If you don't want/need launchctl for MySQL, you can just run:**
 
 ``mysql.server start``
+
+``mysql.server stop``
 
 
 ####To use FastCGI:
