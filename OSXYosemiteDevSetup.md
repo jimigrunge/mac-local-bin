@@ -447,7 +447,7 @@ Place the following in you .zshrc/.bashrc/.profile file in your home directory:
 
 ``launchctl load -Fw ~/Library/LaunchAgents/homebrew.mxcl.php53.plist``
 
-##Capistrono requirements
+##Capistrano requirements
 
 If you are going to use Capistrano/Capifony for pushing your code to servers then you will need to install the Ruby Version Manager. 
 This will allow you to update Ruby and add gems without disturbing the Mac version of Ruby. 
