@@ -51,6 +51,10 @@ Add this line
 
 ## Changelog ##
 
+### 3.1.1
+* Added, Updated, and fixed typos in documentation.
+* Refined shell script functions
+
 ### 3.1
 * Moved to OSX Yosemite
 * Dev setup is now based on <a href="https://echo.co/blog/os-x-1010-yosemite-local-development-environment-apache-php-and-mysql-homebrew" target="_blank">ALAN IVEY's setup</a>
