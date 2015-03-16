@@ -447,6 +447,53 @@ Place the following in you .zshrc/.bashrc/.profile file in your home directory:
 
 ``launchctl load -Fw ~/Library/LaunchAgents/homebrew.mxcl.php53.plist``
 
+##Capistrono requirements
+
+If you are going to use Capistrano/Capifony for pushing your code to servers then you will need to install the Ruby Version Manager. 
+This will allow you to update Ruby and add gems without disturbing the Mac version of Ruby. 
+
+###Install RVM, Ruby, and Rails
+
+**Disable excess documentation** 
+
+``echo "gem: --no-document" >> ~/.gemrc``
+
+**Install RVM w/Ruby and Rails**
+
+``\curl -L https://get.rvm.io | bash -s stable  --auto-dotfiles --autolibs=enabled --rails``
+
+**Load RVM in current terminal session**
+
+``source ~/.rvm/scripts/rvm``
+
+**If it is not already there, place this in your ~/.profile file to load at every login**
+
+``[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"``
+
+**Check if RVM loaded as a function**
+
+``type rvm | head -1``
+
+**Check versions**
+
+``rvm -v`` :: *rvm 1.26.10 at time of document*
+
+``ruby -v`` :: *ruby 2.2.0p0 at time of document*
+
+``rails -v`` :: *Rails 4.2.0 at time of document*
+
+###Install Capifony
+
+*For detailed instructions on installation and usage please see the [Capifony](http://capifony.org/) site.* 
+
+**Run the following command to do a simple install**
+
+``gem install capifony``
+
+**Check install version**
+
+``capifony --version`` :: *capifony v2.8.3 at time of document*
+
 ##END SETUP
 
 ###NOTES
