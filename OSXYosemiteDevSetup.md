@@ -5,6 +5,9 @@ Based on [ALAN IVEY's setup](https://echo.co/blog/os-x-1010-yosemite-local-devel
 
 ####Install xCode and command line tools as per Apple instructions
 
+On OSX 10.10.2 I needed to manually re-install the command line tools.
+
+``xcode-select --install``
 
 ##Install HomeBrew
 
@@ -287,7 +290,7 @@ EOF'
 
 ``brew install php56-imagick``
 
-``brew reinstall -v homebrew/php/php56 --with-fpm --with-postgresql --with-imap --with-homebrew-openssl --with-apache``
+``brew install -v homebrew/php/php56 --with-postgresql --with-imap``
 
 ```shell
 (export USERHOME=$(dscl . -read /Users/`whoami` NFSHomeDirectory | awk -F"\: " '{print $2}') ; sed -i '-default' -e 's|^;\(date\.timezone[[:space:]]*=\).*|\1 \"'$(sudo systemsetup -gettimezone|awk -F"\: " '{print $2}')'\"|; s|^\(memory_limit[[:space:]]*=\).*|\1 512M|; s|^\(post_max_size[[:space:]]*=\).*|\1 200M|; s|^\(upload_max_filesize[[:space:]]*=\).*|\1 100M|; s|^\(default_socket_timeout[[:space:]]*=\).*|\1 600|; s|^\(max_execution_time[[:space:]]*=\).*|\1 300|; s|^\(max_input_time[[:space:]]*=\).*|\1 600|; $a\'$'\n''\'$'\n''; PHP Error log\'$'\n''error_log = '$USERHOME'/Sites/logs/php-error_log'$'\n' $(brew --prefix)/etc/php/5.6/php.ini)
@@ -303,7 +306,7 @@ EOF'
 
 ``brew install php55-imagick``
 
-``brew reinstall -v homebrew/php/php55 --with-fpm --with-postgresql --with-imap --with-homebrew-openssl --with-apache``
+``brew install -v homebrew/php/php55 --with-postgresql --with-imap``
 
 ```shell
 (export USERHOME=$(dscl . -read /Users/`whoami` NFSHomeDirectory | awk -F"\: " '{print $2}') ; sed -i '-default' -e 's|^;\(date\.timezone[[:space:]]*=\).*|\1 \"'$(sudo systemsetup -gettimezone|awk -F"\: " '{print $2}')'\"|; s|^\(memory_limit[[:space:]]*=\).*|\1 512M|; s|^\(post_max_size[[:space:]]*=\).*|\1 200M|; s|^\(upload_max_filesize[[:space:]]*=\).*|\1 100M|; s|^\(default_socket_timeout[[:space:]]*=\).*|\1 600|; s|^\(max_execution_time[[:space:]]*=\).*|\1 300|; s|^\(max_input_time[[:space:]]*=\).*|\1 600|; $a\'$'\n''\'$'\n''; PHP Error log\'$'\n''error_log = '$USERHOME'/Sites/logs/php-error_log'$'\n' $(brew --prefix)/etc/php/5.5/php.ini)
@@ -318,7 +321,7 @@ EOF'
 ####PHP 5.3
 
 ``brew install -v
-homebrew/php/php53 --with-fpm --with-postgresql --with-imap --with-homebrew-openssl``
+homebrew/php/php53 --with-postgresql --with-imap``
 
 ```shell
 (export USERHOME=$(dscl . -read /Users/`whoami` NFSHomeDirectory | awk -F"\: " '{print $2}') ; sed -i '-default' -e 's|^;\(date\.timezone[[:space:]]*=\).*|\1 \"'$(sudo systemsetup -gettimezone|awk -F"\: " '{print $2}')'\"|; s|^\(short_open_tag[[:space:]]*=\).*|\1 On|; s|^\(memory_limit[[:space:]]*=\).*|\1 512M|; s|^\(post_max_size[[:space:]]*=\).*|\1 200M|; s|^\(upload_max_filesize[[:space:]]*=\).*|\1 100M|; s|^\(default_socket_timeout[[:space:]]*=\).*|\1 600|; s|^\(max_execution_time[[:space:]]*=\).*|\1 300|; s|^\(max_input_time[[:space:]]*=\).*|\1 600|; $a\'$'\n''\'$'\n''; PHP Error log\'$'\n''error_log = '$USERHOME'/Sites/logs/php-error_log'$'\n' $(brew --prefix)/etc/php/5.3/php.ini)
@@ -332,13 +335,13 @@ homebrew/php/php53 --with-fpm --with-postgresql --with-imap --with-homebrew-open
 
 ##Install phing
 
+Replace 5.5.XX with your installed version
+
 ``cd /usr/local/Cellar/php55/5.5.XX/bin/``
 
-``sudo pear channel-discover pear.phing.info``
+``sudo ./pear channel-discover pear.phing.info``
 
-``sudo pear install --alldeps phing/phing``
-
-``cd /usr/local/Cellar/php55/5.5.XX/bin``
+``sudo ./pear install --alldeps phing/phing``
 
 ``sudo chown $USER phing``
 
@@ -399,11 +402,11 @@ This will allow you to update Ruby and add gems without disturbing the Mac versi
 
 **Check versions**
 
-``rvm -v`` :: *rvm 1.26.10 at time of document*
+``rvm -v`` :: *rvm 1.26.11 at time of document*
 
-``ruby -v`` :: *ruby 2.2.0p0 at time of document*
+``ruby -v`` :: *ruby 2.2.1p85 at time of document*
 
-``rails -v`` :: *Rails 4.2.0 at time of document*
+``rails -v`` :: *Rails 4.2.1 at time of document*
 
 ###Install Capifony
 
@@ -418,6 +421,8 @@ This will allow you to update Ruby and add gems without disturbing the Mac versi
 ``capifony --version`` :: *capifony v2.8.3 at time of document*
 
 ##END SETUP
+
+---
 
 #NOTES
 

@@ -53,6 +53,7 @@ Add this line
 
 ### 3.1.2
 * Cleaning up configuration file.
+* Update OSX install guide to fix 10.10.2 issues
 
 ### 3.1.1
 * Added, Updated, and fixed typos in documentation.
