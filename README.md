@@ -51,6 +51,9 @@ Add this line
 
 ## Changelog ##
 
+### 3.1.2
+* Cleaning up configuration file.
+
 ### 3.1.1
 * Added, Updated, and fixed typos in documentation.
 * Refined shell script functions
