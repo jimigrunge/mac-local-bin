@@ -5,17 +5,17 @@
 # 
 # @author James Grundner <james@jgrundner.com>
 # v1.0 November 10, 2013
-# @version v3.1.1 March 12, 2015
+# @version v3.1.2 March 12, 2015
 # 
 ############################################################################
 #                User Definable                                            #
 ############################################################################
 # APACHECTL="/usr/sbin/apachectl"
 # APACHEUSR="sudo"
-# HTTPPASSWORD="rocker"
+# HTTPPASSWORD="PASSWORD"
 # MYSQL_INIT_SCRIPT=mysql.server
 # PGSQL_INIT_SCRIPT='pg_ctl -D /usr/local/var/postgres -l /var/log/psql.log'
-HTTPPASSWORD="rocker"
+HTTPPASSWORD="SET-TO-YOUR-PASSWORD"
 ARGV=$1
 APACHECTL="/usr/local/bin/apachectl"
 PHP_EXE="/usr/local/bin/php"
