@@ -47,7 +47,47 @@ ln -s ImageMagick-6 ImageMagick
 
 ``ln -sfv /usr/local/opt/postgresql/homebrew.mxcl.postgresql.plist ~/Library/LaunchAgents/``
 
+Default database user will automatically be set to your system username with no password. 
+To see your system username type the  into the console.
+
+``echo whoami``
+
 ##Install MySQL
+
+###Set Up MySQL 55
+
+*This setup is for legacy clients that break on 5.6+ changes. ex: CI::Payback*
+
+``brew install mysql55``
+
+**MySQL Configs for performance**
+
+``cp -v $(brew --prefix mysql55)/support-files/my-medium.cnf $(brew --prefix)/etc/my.cnf``
+
+```
+cat >> $(brew --prefix)/etc/my.cnf <<'EOF'
+    innodb_file_per_table = 1
+EOF
+```
+
+``sed -i '' 's/^#[[:space:]]*\(innodb_buffer_pool_size\)/\1/' $(brew --prefix)/etc/my.cnf``
+
+``ln -sfv $(brew --prefix mysql55)/*.plist ~/Library/LaunchAgents``
+
+**Set password for root user**
+
+``cd /usr/local/Cellar/mysql55/5.5.XX/bin/``
+
+``./mysqladmin -u root password "PASSWORD"``
+
+###Set Up MySQL Latest (5.6)
+
+*This is just for refference.*
+
+This is only if you need the latest greatest MySQL. 
+This has not been tested along side MySQL55. 
+Your results may very. Use at your own risk.
+
 
 ``brew install mysql``
 

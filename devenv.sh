@@ -5,7 +5,7 @@
 # 
 # @author James Grundner <james@jgrundner.com>
 # v1.0 November 10, 2013
-# @version v3.1.2 March 12, 2015
+# @version v3.1.3 March 12, 2015
 # 
 ############################################################################
 #                User Definable                                            #
@@ -20,7 +20,7 @@ ARGV=$1
 APACHECTL="/usr/local/bin/apachectl"
 PHP_EXE="/usr/local/bin/php"
 PGSQL_PLIST="/Users/$USER/Library/LaunchAgents/homebrew.mxcl.postgresql.plist"
-MYSQL_PLIST="/Users/$USER/Library/LaunchAgents/homebrew.mxcl.mysql.plist"
+MYSQL_PLIST="/Users/$USER/Library/LaunchAgents/homebrew.mxcl.mysql55.plist"
 HTTPD_PLIST="/Users/$USER/Library/LaunchAgents/homebrew.mxcl.httpd22.plist"
 PHP53_PLIST="/Users/$USER/Library/LaunchAgents/homebrew.mxcl.php53.plist"
 PHP55_PLIST="/Users/$USER/Library/LaunchAgents/homebrew.mxcl.php55.plist"
