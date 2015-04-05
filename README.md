@@ -51,6 +51,10 @@ Add this line
 
 ## Changelog ##
 
+### 3.1.3
+* Cleaning up configuration file.
+* Changing MySQL to version 5.5 for client compatability
+
 ### 3.1.2
 * Cleaning up configuration file.
 * Update OSX install guide to fix 10.10.2 issues
