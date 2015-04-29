@@ -51,6 +51,11 @@ Add this line
 
 ## Changelog ##
 
+### 3.2
+* Added more functions to server
+* Switched postgres to use pg_ctl due to server locks
+* Added myzsh config
+
 ### 3.1.3
 * Cleaning up configuration file.
 * Changing MySQL to version 5.5 for client compatability
