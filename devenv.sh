@@ -77,7 +77,7 @@ apache_start(){
     launchctl load -Fw $HTTPD_PLIST
     sleep 1
 }
-apacher_stop(){
+apache_stop(){
 	echo "-> Shutting down Apache"
     launchctl unload $HTTPD_PLIST
     sleep 1
@@ -104,7 +104,6 @@ apache_dev_error_stream(){
 apache_dev_access_stream(){
     tail -f $DEV_ACCESS_LOG
 }
-
 
 mysql_start(){
 	echo "-> Starting MySQL"
@@ -139,7 +138,7 @@ postgres_start(){
 }
 postgres_stop(){
     echo '-> Shutting down Postgresql'
-    pg_ctl $PGSQL_DATA stop -m fast
+    pg_ctl -D $PGSQL_DATA stop -m fast
     sleep 1
 }
 postgres_restart(){
