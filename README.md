@@ -51,6 +51,9 @@ Add this line
 
 ## Changelog ##
 
+### 3.2.2
+* Fixed typos
+
 ### 3.2
 * Added more functions to server
 * Switched postgres to use pg_ctl due to server locks
