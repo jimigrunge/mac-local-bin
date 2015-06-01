@@ -13,9 +13,9 @@ This is just a collection of utility scripts used on my Macs.
 
 ## Scripts
 
-* __dev__: This script controls starting and stopping local dev servers.
+* __server__: This script controls starting and stopping local dev servers.
     * __Servers__: Apache, MySQL, PostgreSQL
-    * __Instructions__: `dev --help`
+    * __Instructions__: `server --help`
 
 
 ##Installing
@@ -50,6 +50,10 @@ Add this line
 * No one has asked any yet.
 
 ## Changelog ##
+
+### 3.3
+* Added ability to show server statuses 
+* Fixed typos in readme file
 
 ### 3.2.2
 * Fixed typos

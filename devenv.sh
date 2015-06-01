@@ -5,7 +5,7 @@
 # 
 # @author James Grundner <james@jgrundner.com>
 # v1.0 November 10, 2013
-# @version v3.2.2 May 26, 2015
+# @version v3.3 June 1, 2015
 # 
 ############################################################################
 #                User Definable                                            #
@@ -27,6 +27,7 @@ PGSQL_PLIST="/Users/$USER/Library/LaunchAgents/homebrew.mxcl.postgresql.plist"
 PGSQL_DATA="/usr/local/var/postgres"
 PGSQL_LOGS="/usr/local/var/postgres/server.log"
 PGSQL_PID_FILE="/usr/local/var/postgres/postmaster.pid"
+PGSQL_CTL="/usr/local/bin/pg_ctl"
 MYSQL_PLIST="/Users/$USER/Library/LaunchAgents/homebrew.mxcl.mysql55.plist"
 MYSQL_LOGS=$(brew --prefix)/var/mysql/$(hostname).err
 MYSQL_PID=$(brew --prefix)/var/mysql/$(hostname).pid
@@ -72,6 +73,12 @@ restart(){
     start
 }
 
+status(){
+	apache_status
+	mysql_status
+	postgres_status
+}
+
 apache_start(){
 	echo "-> Starting Apache"
     launchctl load -Fw $HTTPD_PLIST
@@ -104,6 +111,11 @@ apache_dev_error_stream(){
 apache_dev_access_stream(){
     tail -f $DEV_ACCESS_LOG
 }
+apache_status(){
+	echo ""
+	echo "-> Apache Status: "
+	apachectl status
+}
 
 mysql_start(){
 	echo "-> Starting MySQL"
@@ -130,15 +142,32 @@ mysql_log_stream(){
 mysql_pid_file(){
     echo "-> $MYSQL_PID"
 }
+mysql_status(){
+	echo ""
+	echo "-> MySQL Status: "
+	mysql.server status
+}
+mysql_status_long(){
+	echo ""
+	echo "-> MySQL Status: "
+	expect -c "
+	        spawn mysqladmin -u root -p status
+	        expect {
+	            "*password:*" { send $HTTPPASSWORD\r\n; interact }
+	            eof { exit }
+	        }
+	        exit
+	    "
+}
 
 postgres_start(){
     echo '-> Starting Postgresql'
-    pg_ctl -D $PGSQL_DATA -l $PGSQL_LOGS start
+    $PGSQL_CTL -D $PGSQL_DATA -l $PGSQL_LOGS start
     sleep 1
 }
 postgres_stop(){
     echo '-> Shutting down Postgresql'
-    pg_ctl -D $PGSQL_DATA stop -m fast
+    $PGSQL_CTL -D $PGSQL_DATA stop -m fast
     sleep 1
 }
 postgres_restart(){
@@ -153,6 +182,11 @@ postgres_log_stream(){
 }
 postgres_pid_file(){
     echo "-> $PGSQL_PID_FILE"
+}
+postgres_status(){
+	echo ""
+	echo "-> PostgreSQL Status: "
+	$PGSQL_CTL status -D $PGSQL_DATA
 }
 
 load_php53(){
@@ -254,6 +288,8 @@ case "$ARGV" in
                 apache_restart ;;
             logs)
                 apache_logs ;;
+			status)
+				apache_status ;;
             tail)
                 case "$3" in
                     error)
@@ -284,6 +320,8 @@ case "$ARGV" in
                 postgres_log_stream ;;
             pidfile)
                 postgres_pid_file ;;
+			status)
+				postgres_status ;;
         esac
         end_session
     ;;
@@ -302,6 +340,10 @@ case "$ARGV" in
                 mysql_log_stream ;;
             pidfile)
                 mysql_pid_file ;;
+			status)
+				mysql_status ;;
+			fullstatus)
+				mysql_status_long ;;
         esac
         end_session
     ;;
@@ -323,6 +365,9 @@ case "$ARGV" in
 		postgres_restart
 		end_session
 	;;
+	status)
+		status
+	;;
     *)
         clear
         echo $"Usage: $0 
@@ -330,6 +375,7 @@ case "$ARGV" in
             stop      -- Stop the whole DEV environment
             start     -- Start the whole DEV environment
             restart   -- Restart the whole DEV environment
+			status    -- Display all statuses
             test      -- Run server configuration test
 
     Switching PHP versions. Automatically restarts web server
@@ -340,13 +386,14 @@ case "$ARGV" in
             php [log|tail]
 
     Controlling individual components 
-            postgres  [stop|start|restart|log|tail|pidfile]  -- PostgreSQL
-            mysql     [stop|start|restart|log|tail|pidfile]  -- MySQL
+            postgres  [stop|start|restart|log|tail|pidfile|status]  -- PostgreSQL
+            mysql     [stop|start|restart|log|tail|pidfile|status|fullstatus]  -- MySQL
             apache    [
                           stop
                           start
                           restart
                           logs
+						  status
                           tail [error|access|deverror|devaccess]
                       ]  -- Apache
         "

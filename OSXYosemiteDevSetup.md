@@ -202,11 +202,21 @@ NameVirtualHost *:8443
 <VirtualHost _default_:8080>
     ServerName localhost
     DocumentRoot "${USERHOME}/Sites"
+	<Location "/server-status">
+	   SetHandler server-status
+	   Order allow,deny
+	   Allow from all 
+	</Location>
 </VirtualHost>
 <VirtualHost _default_:8443>
     ServerName localhost
     Include "${USERHOME}/Sites/ssl/ssl-shared-cert.inc"
     DocumentRoot "${USERHOME}/Sites"
+	<Location "/server-status">
+	   SetHandler server-status
+	   Order allow,deny
+	   Allow from all 
+	</Location>
 </VirtualHost>
  
 #
@@ -247,6 +257,12 @@ LogFormat "%V %h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" comb
   ErrorLog "${USERHOME}/Sites/logs/dev-error_log"
  
   VirtualDocumentRoot ${USERHOME}/Sites/%-2+
+  <Location /server-status>
+    SetHandler server-status
+    Order allow,deny
+    Deny from all
+    Allow from dev
+  </Location>
 </VirtualHost>
 <VirtualHost *:8443>
   ServerName dev
@@ -257,7 +273,16 @@ LogFormat "%V %h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" comb
   ErrorLog "${USERHOME}/Sites/logs/dev-error_log"
  
   VirtualDocumentRoot ${USERHOME}/Sites/%-2+
+  <Location /server-status>
+    SetHandler server-status
+    Order allow,deny
+    Deny from all
+    Allow from dev
+  </Location>
 </VirtualHost>
+
+ExtendedStatus On
+
 EOF
 )
 ```
