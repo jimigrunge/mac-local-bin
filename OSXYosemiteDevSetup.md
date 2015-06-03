@@ -3,17 +3,21 @@
 Based on [ALAN IVEY's setup](https://echo.co/blog/os-x-1010-yosemite-local-development-environment-apache-php-and-mysql-homebrew)
 
 
-####Install xCode and command line tools as per Apple instructions
+##Install xCode and command line tools
 
-On OSX 10.10.2 I needed to manually re-install the command line tools.
+On OSX 10.10.2+ We need to manually re-install the command line tools.
 
 ``xcode-select --install``
 
 ##Install HomeBrew
 
+If you've not already installed Homebrew, you can follow the instructions at [http://brew.sh](http://brew.sh). 
+
 ``ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"``
 
 ##Install GIT, if missing
+
+If you do not have git available on your system, either from Homebrew, Xcode, or another source, you can install it with Homebrew now
 
 ``brew install -v git``
 
@@ -39,65 +43,38 @@ brew install pbzip2
 brew install imagemagick
 cd /usr/local/include
 ln -s ImageMagick-6 ImageMagick
+
+brew tap homebrew/services
 ```
+
+This last command leverages the new brew services command. No longer any need to mess with `launchctl`. 
+More information can be found at [brew services](https://github.com/Homebrew/homebrew-services)
 
 ##Install PostgreSQL
 
 ``brew install postgresql``
 
-``ln -sfv /usr/local/opt/postgresql/homebrew.mxcl.postgresql.plist ~/Library/LaunchAgents/``
+``brew services start postgresql``
 
 Default database user will automatically be set to your system username with no password. 
 To see your system username type the  into the console.
 
-``echo whoami``
+``echo $USER``
 
 ##Install MySQL
 
-###Set Up MySQL 55
-
-*This setup is for legacy clients that break on 5.6+ changes. ex: CI::Payback*
-
-``brew install mysql55``
-
-**MySQL Configs for performance**
-
-``cp -v $(brew --prefix mysql55)/support-files/my-medium.cnf $(brew --prefix)/etc/my.cnf``
-
-```
-cat >> $(brew --prefix)/etc/my.cnf <<'EOF'
-    innodb_file_per_table = 1
-EOF
-```
-
-``sed -i '' 's/^#[[:space:]]*\(innodb_buffer_pool_size\)/\1/' $(brew --prefix)/etc/my.cnf``
-
-``ln -sfv $(brew --prefix mysql55)/*.plist ~/Library/LaunchAgents``
-
-**Set password for root user**
-
-``cd /usr/local/Cellar/mysql55/5.5.XX/bin/``
-
-``./mysqladmin -u root password "PASSWORD"``
-
-###Set Up MySQL Latest (5.6)
-
-*This is just for refference.*
-
-This is only if you need the latest greatest MySQL. 
-This has not been tested along side MySQL55. 
-Your results may very. Use at your own risk.
-
+###Install MySQL with Homebrew:
 
 ``brew install mysql``
 
-**MySQL Configs for performance**
+###Setup MySQL Configurations for performance
 
 ``cp -v $(brew --prefix mysql)/support-files/my-default.cnf $(brew --prefix)/etc/my.cnf``
 
 ```
 cat >> $(brew --prefix)/etc/my.cnf <<'EOF'
-	# Echo & Co. changes
+    # -------------------------
+    # Manual changes follow
 	max_allowed_packet = 1073741824
 	innodb_file_per_table = 1
 EOF
@@ -105,30 +82,64 @@ EOF
 
 ``sed -i '' 's/^#[[:space:]]*\(innodb_buffer_pool_size\)/\1/' $(brew --prefix)/etc/my.cnf``
 
-``ln -sfv $(brew --prefix mysql)/homebrew.mxcl.mysql.plist ~/Library/LaunchAgents/``
+###Start MySQL service
 
+``brew services start mysql``
 
-##Apache install
+> By default, MySQL's root user has an empty password from any connection. 
+> It is advisable to run mysql_secure_installation and at least set a password for the root user.
+> ``$(brew --prefix mysql)/bin/mysql_secure_installation``
+
+##Apache
+
+###Stopping the built-in Apache, 
+If Apache is running, stop it and prevent it from starting on boot. 
+This is one of very few times you'll need to use sudo:
 
 ``sudo launchctl unload /System/Library/LaunchDaemons/org.apache.httpd.plist 2>/dev/null``
 
+###Why Apache 2.2
+We're installing Apache 2.2 with the event MPM and set up PHP-FPM instead of mod_php. 
+
+1. switching PHP versions is far easier with PHP-FPM and the default 9000 port instead of also editing the Apache configuration to switch the mod_php module location
+
+2. Not using mod_php we don't have to use the prefork MPM and can get better performance with event or worker.
+
+3. I'm using 2.2 instead of 2.4 because popular projects like Drupal and WordPress still ship with 2.2-style .htaccess files.
+
+4. 2.4 sometimes means you have to set up "compat" modules, and that's above the requirement for a local environment, in my opinion.
+
+###Install Apache
+Onward with the install. We'll use Homebrew's OpenSSL library since it's more up-to-date than OS X's
+
 ``brew install -v homebrew/apache/httpd22 --with-homebrew-openssl --with-mpm-event``
+
+In order to get Apache and PHP to communicate via PHP-FPM, we'll install the mod_fastcgi module:
 
 ``brew install -v homebrew/apache/mod_fastcgi --with-homebrew-httpd22``
 
+To prevent any potential problems with previous mod_fastcgi setups, let's remove all references to the mod_fastcgi module 
+( _we'll re-add the new version later_ )
+
 ``sed -i '' '/fastcgi_module/d' $(brew --prefix)/etc/apache2/2.2/httpd.conf``
+
+###Configure Apache
+
+Add the logic for Apache to send PHP to PHP-FPM with mod_fastcgi, and reference that we'll want to use the file 
+`~/Sites/httpd-vhosts.conf` to configure our VirtualHosts.
 
 **This is all one command, so copy and paste the entire code block at once:**
 
 ```shell
 (export USERHOME=$(dscl . -read /Users/`whoami` NFSHomeDirectory | awk -F"\: " '{print $2}') ; export MODFASTCGIPREFIX=$(brew --prefix mod_fastcgi) ; cat >> $(brew --prefix)/etc/apache2/2.2/httpd.conf <<EOF
- 
-# Echo & Co. changes
- 
-# Load PHP-FPM via mod_fastcgi
+ # -------------------------
+ # Manual changes follow
+ # -------------------------
+ # Load PHP-FPM via mod_fastcgi
+ # -------------------------
 LoadModule fastcgi_module    ${MODFASTCGIPREFIX}/libexec/mod_fastcgi.so
  
-<IfModule fastcgi_module>
+ <IfModule fastcgi_module>
   FastCgiConfig -maxClassProcesses 1 -idle-timeout 1500
  
   # Prevent accessing FastCGI alias paths directly
@@ -152,14 +163,18 @@ LoadModule fastcgi_module    ${MODFASTCGIPREFIX}/libexec/mod_fastcgi.so
  
   # PHP options
   AddType text/html .php
+  AddType application/x-httpd-php .php
   DirectoryIndex index.php index.html
-</IfModule>
- 
-# Include our VirtualHosts
+ </IfModule>
+ # -------------------------
+ # Include our VirtualHosts
+ # -------------------------
 Include ${USERHOME}/Sites/httpd-vhosts.conf
 EOF
 )
 ```
+
+###Configure automated Vhosts
 
 We'll be using the file `~/Sites/httpd-vhosts.conf` to configure our VirtualHosts.
 The `~/Sites` folder doesn't exist by default in OSX (10.10+).
@@ -171,22 +186,23 @@ We'll also create folders for logs and SSL files:
 
 ```shell
 (export USERHOME=$(dscl . -read /Users/`whoami` NFSHomeDirectory | awk -F"\: " '{print $2}') ; cat > ~/Sites/httpd-vhosts.conf <<EOF
-#
-# Listening ports.
-#
-#Listen 8080  # defined in main httpd.conf
+ # -------------------------
+ # Listening ports.
+ # -------------------------
+ #Listen 8080  # defined in main httpd.conf
+ # -------------------------
 Listen 8443
  
-#
-# Use name-based virtual hosting.
-#
+ # -------------------------
+ # Use name-based virtual hosting.
+ # -------------------------
 NameVirtualHost *:8080
 NameVirtualHost *:8443
  
-#
-# Set up permissions for VirtualHosts in ~/Sites
-#
-<Directory "${USERHOME}/Sites">
+ # -------------------------
+ # Set up permissions for VirtualHosts in ~/Sites
+ # -------------------------
+ <Directory "${USERHOME}/Sites">
     Options Indexes FollowSymLinks MultiViews
     AllowOverride All
     <IfModule mod_authz_core.c>
@@ -196,10 +212,11 @@ NameVirtualHost *:8443
         Order allow,deny
         Allow from all
     </IfModule>
-</Directory>
- 
-# For http://localhost in the users' Sites folder
-<VirtualHost _default_:8080>
+ </Directory>
+ # -------------------------
+ # For http://localhost in the users' Sites folder
+ # -------------------------
+ <VirtualHost _default_:8080>
     ServerName localhost
     DocumentRoot "${USERHOME}/Sites"
 	<Location "/server-status">
@@ -207,8 +224,8 @@ NameVirtualHost *:8443
 	   Order allow,deny
 	   Allow from all 
 	</Location>
-</VirtualHost>
-<VirtualHost _default_:8443>
+ </VirtualHost>
+ <VirtualHost _default_:8443>
     ServerName localhost
     Include "${USERHOME}/Sites/ssl/ssl-shared-cert.inc"
     DocumentRoot "${USERHOME}/Sites"
@@ -217,39 +234,40 @@ NameVirtualHost *:8443
 	   Order allow,deny
 	   Allow from all 
 	</Location>
-</VirtualHost>
+ </VirtualHost>
  
-#
-# VirtualHosts
-#
+ # -------------------------
+ # VirtualHosts
+ # -------------------------
+ ## Manual VirtualHost template for HTTP and HTTPS
+ # -------------------------
+ #<VirtualHost *:8080>
+ #  ServerName project.dev
+ #  CustomLog "${USERHOME}/Sites/logs/project.dev-access_log" combined
+ #  ErrorLog "${USERHOME}/Sites/logs/project.dev-error_log"
+ #  DocumentRoot "${USERHOME}/Sites/project.dev"
+ #</VirtualHost>
+ #<VirtualHost *:8443>
+ #  ServerName project.dev
+ #  Include "${USERHOME}/Sites/ssl/ssl-shared-cert.inc"
+ #  CustomLog "${USERHOME}/Sites/logs/project.dev-access_log" combined
+ #  ErrorLog "${USERHOME}/Sites/logs/project.dev-error_log"
+ #  DocumentRoot "${USERHOME}/Sites/project.dev"
+ #</VirtualHost>
  
-## Manual VirtualHost template for HTTP and HTTPS
-#<VirtualHost *:8080>
-#  ServerName project.dev
-#  CustomLog "${USERHOME}/Sites/logs/project.dev-access_log" combined
-#  ErrorLog "${USERHOME}/Sites/logs/project.dev-error_log"
-#  DocumentRoot "${USERHOME}/Sites/project.dev"
-#</VirtualHost>
-#<VirtualHost *:8443>
-#  ServerName project.dev
-#  Include "${USERHOME}/Sites/ssl/ssl-shared-cert.inc"
-#  CustomLog "${USERHOME}/Sites/logs/project.dev-access_log" combined
-#  ErrorLog "${USERHOME}/Sites/logs/project.dev-error_log"
-#  DocumentRoot "${USERHOME}/Sites/project.dev"
-#</VirtualHost>
- 
-#
-# Automatic VirtualHosts
-#
-# A directory at ${USERHOME}/Sites/webroot can be accessed at http://webroot.dev
-# In Drupal, uncomment the line with: RewriteBase /
-#
- 
-# This log format will display the per-virtual-host as the first field followed by a typical log line
+ # -------------------------
+ # Automatic VirtualHosts
+ # -------------------------
+ # A directory at ${USERHOME}/Sites/webroot can be accessed at http://webroot.dev
+ # In Drupal, uncomment the line with: RewriteBase /
+ # -------------------------
+ # This log format will display the per-virtual-host as the first field followed by a typical log line
 LogFormat "%V %h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combinedmassvhost
  
-# Auto-VirtualHosts with .dev
-<VirtualHost *:8080>
+ # -------------------------
+ # Auto-VirtualHosts with .dev
+ # -------------------------
+ <VirtualHost *:8080>
   ServerName dev
   ServerAlias *.dev
  
@@ -263,8 +281,8 @@ LogFormat "%V %h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" comb
     Deny from all
     Allow from dev
   </Location>
-</VirtualHost>
-<VirtualHost *:8443>
+ </VirtualHost>
+ <VirtualHost *:8443>
   ServerName dev
   ServerAlias *.dev
   Include "${USERHOME}/Sites/ssl/ssl-shared-cert.inc"
@@ -279,7 +297,7 @@ LogFormat "%V %h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" comb
     Deny from all
     Allow from dev
   </Location>
-</VirtualHost>
+ </VirtualHost>
 
 ExtendedStatus On
 
@@ -287,8 +305,13 @@ EOF
 )
 ```
 
+###Configure SSL certs
+
+You may have noticed that ~/Sites/ssl/ssl-shared-cert.inc is included multiple times; 
+create that file and the SSL files it needs:
+
 ```shell
-export USERHOME=$(dscl . -read /Users/`whoami` NFSHomeDirectory | awk -F"\: " '{print $2}') ; cat > ~/Sites/ssl/ssl-shared-cert.inc <<EOF
+(export USERHOME=$(dscl . -read /Users/`whoami` NFSHomeDirectory | awk -F"\: " '{print $2}') ; cat > ~/Sites/ssl/ssl-shared-cert.inc <<EOF
 SSLEngine On
 SSLProtocol all -SSLv2 -SSLv3
 SSLCipherSuite ALL:!ADH:!EXPORT:!SSLv2:RC4+RSA:+HIGH:+MEDIUM:+LOW
@@ -311,10 +334,11 @@ openssl req \
 
 ```
 
-``ln -sfv $(brew --prefix httpd22)/homebrew.mxcl.httpd22.plist ~/Library/LaunchAgents``
+###Start Homebrew's Apache and set to start on login
 
-``launchctl load -Fw ~/Library/LaunchAgents/homebrew.mxcl.httpd22.plist``
+``brew services start httpd22``
 
+###Fix ports
 httpd.conf is running Apache on ports 8080 and 8443. The next two commands will create and load a firewall rule to forward port 80 requests to 8080, and port 443 requests to 8443.
 
 ```shell
@@ -347,75 +371,83 @@ EOF'
 
 ##Install PHP versions
 
-####Check for availability of Image Magic plugins
+The following is for the latest release of PHP, version 5.6. If you'd like to use 5.3, 5.4 or 5.5, 
+simply change the "5.6" and "php56" values below appropriately.
+
+###Image Magic support
+If you need Image Magic support for image manipulation run the following commands.
+
+See what versions are available:
 
 ``brew search imagick``
 
-####PHP 5.6
+Install required version:
 
 ``brew install php56-imagick``
 
+
+###Install PHP
+
+We are installing with postgresql and imap support. Other options can be added as needed.
+
+> If you installed with imagick then use `reinstall`
+
 ``brew install -v homebrew/php/php56 --with-postgresql --with-imap``
+
+Set timezone and change other PHP settings (sudo is needed here to get the current timezone on OS X) 
+to be more developer-friendly, and add a PHP error log (without this, 
+you may get Internal Server Errors if PHP has errors to write and no logs to write to)
 
 ```shell
 (export USERHOME=$(dscl . -read /Users/`whoami` NFSHomeDirectory | awk -F"\: " '{print $2}') ; sed -i '-default' -e 's|^;\(date\.timezone[[:space:]]*=\).*|\1 \"'$(sudo systemsetup -gettimezone|awk -F"\: " '{print $2}')'\"|; s|^\(memory_limit[[:space:]]*=\).*|\1 512M|; s|^\(post_max_size[[:space:]]*=\).*|\1 200M|; s|^\(upload_max_filesize[[:space:]]*=\).*|\1 100M|; s|^\(default_socket_timeout[[:space:]]*=\).*|\1 600|; s|^\(max_execution_time[[:space:]]*=\).*|\1 300|; s|^\(max_input_time[[:space:]]*=\).*|\1 600|; $a\'$'\n''\'$'\n''; PHP Error log\'$'\n''error_log = '$USERHOME'/Sites/logs/php-error_log'$'\n' $(brew --prefix)/etc/php/5.6/php.ini)
 ```
 
+###Fix a pear and pecl permissions problem
+
 ``sudo chown -R $USER $(brew --prefix php56)/lib/php``
 
 ``chmod -R ug+w $(brew --prefix php56)/lib/php``
 
-``ln -sfv $(brew --prefix php56)/*.plist ~/Library/LaunchAgents/``
+###Opcache
 
-####PHP 5.5
+The optional Opcache extension will speed up your PHP environment dramatically, so let's install it. Then, we'll bump up the opcache memory limit:
 
-``brew install php55-imagick``
+``brew install -v php56-opcache``
 
-``brew install -v homebrew/php/php55 --with-postgresql --with-imap``
+``/usr/bin/sed -i '' "s|^\(\;\)\{0,1\}[[:space:]]*\(opcache\.enable[[:space:]]*=[[:space:]]*\)0|\21|; s|^;\(opcache\.memory_consumption[[:space:]]*=[[:space:]]*\)[0-9]*|\1256|;" $(brew --prefix)/etc/php/5.6/php.ini``
 
-```shell
-(export USERHOME=$(dscl . -read /Users/`whoami` NFSHomeDirectory | awk -F"\: " '{print $2}') ; sed -i '-default' -e 's|^;\(date\.timezone[[:space:]]*=\).*|\1 \"'$(sudo systemsetup -gettimezone|awk -F"\: " '{print $2}')'\"|; s|^\(memory_limit[[:space:]]*=\).*|\1 512M|; s|^\(post_max_size[[:space:]]*=\).*|\1 200M|; s|^\(upload_max_filesize[[:space:]]*=\).*|\1 100M|; s|^\(default_socket_timeout[[:space:]]*=\).*|\1 600|; s|^\(max_execution_time[[:space:]]*=\).*|\1 300|; s|^\(max_input_time[[:space:]]*=\).*|\1 600|; $a\'$'\n''\'$'\n''; PHP Error log\'$'\n''error_log = '$USERHOME'/Sites/logs/php-error_log'$'\n' $(brew --prefix)/etc/php/5.5/php.ini)
-```
+###Finally, let's start PHP-FPM
 
-``sudo chown -R $USER $(brew --prefix php55)/lib/php``
+``brew services start php56``
 
-``chmod -R ug+w $(brew --prefix php55)/lib/php``
-
-``ln -sfv $(brew --prefix php55)/*.plist ~/Library/LaunchAgents/``
-
-####PHP 5.3
-
-``brew install -v
-homebrew/php/php53 --with-postgresql --with-imap``
-
-```shell
-(export USERHOME=$(dscl . -read /Users/`whoami` NFSHomeDirectory | awk -F"\: " '{print $2}') ; sed -i '-default' -e 's|^;\(date\.timezone[[:space:]]*=\).*|\1 \"'$(sudo systemsetup -gettimezone|awk -F"\: " '{print $2}')'\"|; s|^\(short_open_tag[[:space:]]*=\).*|\1 On|; s|^\(memory_limit[[:space:]]*=\).*|\1 512M|; s|^\(post_max_size[[:space:]]*=\).*|\1 200M|; s|^\(upload_max_filesize[[:space:]]*=\).*|\1 100M|; s|^\(default_socket_timeout[[:space:]]*=\).*|\1 600|; s|^\(max_execution_time[[:space:]]*=\).*|\1 300|; s|^\(max_input_time[[:space:]]*=\).*|\1 600|; $a\'$'\n''\'$'\n''; PHP Error log\'$'\n''error_log = '$USERHOME'/Sites/logs/php-error_log'$'\n' $(brew --prefix)/etc/php/5.3/php.ini)
-```
-
-``sudo chown -R $USER $(brew --prefix php53)/lib/php``
-
-``chmod -R ug+w $(brew --prefix php53)/lib/php``
-
-``ln -sfv $(brew --prefix php53)/*.plist ~/Library/LaunchAgents/``
+> Optional: At this point, if you want to switch between PHP versions, you'd want to: `brew services stop php56 && brew unlink php56 && brew link php54 && brew services start php54`. No need to touch the Apache configuration at all!
 
 ##Install phing
 
-Replace 5.5.XX with your installed version
+Replace 5.6.XX with your installed version
 
-``cd /usr/local/Cellar/php55/5.5.XX/bin/``
+``cd /usr/local/Cellar/php56/5.6.XX/bin/``
 
 ``sudo ./pear channel-discover pear.phing.info``
 
 ``sudo ./pear install --alldeps phing/phing``
 
-``sudo chown $USER phing``
+``sudo chown -R  $USER ../bin``
+
+``chmod -R ug+w ../bin``
+
+~~``sudo chown $USER phing``~~
 
 ``cd /usr/local/bin``
 
-``ln -s ../Cellar/php55/5.5.XX/bin/phing``
+``ln -s ../Cellar/php56/5.6.XX/bin/phing``
 
-##Install DNSMASQ and configure for .dev
+##DNSMASQ
 
+Never touch your local /etc/hosts file in OS X again.
+Any DNS request ending in .dev reply with the IP address 127.0.0.1
+
+###Install DNSMASQ
 ``brew install -v dnsmasq``
 
 ``echo 'address=/.dev/127.0.0.1' > $(brew --prefix)/etc/dnsmasq.conf``
@@ -424,9 +456,12 @@ Replace 5.5.XX with your installed version
 
 ``echo 'port=35353' >> $(brew --prefix)/etc/dnsmasq.conf``
 
-``ln -sfv $(brew --prefix dnsmasq)/homebrew.mxcl.dnsmasq.plist ~/Library/LaunchAgents``
+###Start DNSMasq
 
-``launchctl load -Fw ~/Library/LaunchAgents/homebrew.mxcl.dnsmasq.plist``
+`brew services start dnsmasq`
+
+###Configure 
+With DNSMasq running, configure OS X to use your local host for DNS queries ending in .dev:
 
 ``sudo mkdir -v /etc/resolver``
 
@@ -434,6 +469,7 @@ Replace 5.5.XX with your installed version
 
 ``sudo bash -c 'echo "port 35353" >> /etc/resolver/dev'``
 
+###Test 
 To test, the command ``ping -c 3 fakedomainthatisntreal.dev`` should
 return results from ``127.0.0.1``. If it doesn't work right away, try
 turning WiFi off and on
@@ -487,8 +523,6 @@ This will allow you to update Ruby and add gems without disturbing the Mac versi
 
 ##END SETUP
 
----
-
 #NOTES
 
 ##Paths
@@ -500,74 +534,37 @@ Place the following in you .zshrc/.bashrc/.profile file in your home directory:
 
 ##Start Up Commands
 
-``launchctl load -Fw ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist``
+``brew services start postgresql``
 
-``launchctl load -Fw ~/Library/LaunchAgents/homebrew.mxcl.mysql.plist``
+``brew services start mysql``
 
-``launchctl load -Fw ~/Library/LaunchAgents/homebrew.mxcl.httpd22.plist``
+``brew services start httpd22``
 
-``launchctl load -Fw ~/Library/LaunchAgents/homebrew.mxcl.php56.plist``
+``brew services start php53``
 
-``launchctl load -Fw ~/Library/LaunchAgents/homebrew.mxcl.php55.plist``
-
-``launchctl load -Fw ~/Library/LaunchAgents/homebrew.mxcl.php53.plist``
-
+``brew services start php56``
 
 ##Shutdown Commands
 
-``launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist``
+``brew services stop postgresql``
 
-``launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.mysql.plist``
+``brew services stop mysql``
 
-``launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.httpd22.plist``
+``brew services stop httpd22``
 
-``launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.php56.plist``
+``brew services stop php53``
 
-``launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.php55.plist``
-
-``launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.php53.plist``
-
+``brew services stop php56``
 
 ##Swapping PHP versions
 
 ####— PHP56
 
-``brew unlink php55 && brew unlink php53``
-
-``brew link php56``
-
-``launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.php55.plist``
-
-``launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.php53.plist``
-
-``launchctl load -Fw ~/Library/LaunchAgents/homebrew.mxcl.php56.plist``
-
-
-####— PHP55
-
-``brew unlink php56 && brew unlink php53``
-
-``brew link php55``
-
-``launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.php56.plist``
-
-``launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.php53.plist``
-
-``launchctl load -Fw ~/Library/LaunchAgents/homebrew.mxcl.php55.plist``
-
+``brew services stop php53 && brew unlink php53 && brew link php56 && brew services start php56``
 
 ####— PHP53
 
-``brew unlink php55 && brew unlink php56``
-
-``brew link php53``
-
-``launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.php55.plist``
-
-``launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.php56.plist``
-
-``launchctl load -Fw ~/Library/LaunchAgents/homebrew.mxcl.php53.plist``
-
+``brew services stop php56 && brew unlink php56 && brew link php53 && brew services start php53``
 
 ####To check log files for error output
 
@@ -589,8 +586,6 @@ Place the following in you .zshrc/.bashrc/.profile file in your home directory:
 
 * No log file, run this in terminal to watch output: 
 * ``dnsmasq --keep-in-foreground ``
-
-
 
 
 **If you don't want/need launchctl for PostgreSQL, you can just run:**
@@ -621,7 +616,6 @@ Upon restarting Apache, you should see the following message in the error log:
 
 * ``/usr/local/bin/php``
 * ``/usr/local/etc/php/5.3/php.ini``
-* ``/usr/local/etc/php/5.5/php.ini``
 * ``/usr/local/etc/php/5.6/php.ini``
 * ``/usr/local/opt/php53/libexec/apache2/libphp5.so``
 * ``/usr/local/opt/php55/libexec/apache2/libphp5.so``
