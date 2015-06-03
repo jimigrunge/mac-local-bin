@@ -9,7 +9,7 @@ This is just a collection of utility scripts used on my Macs.
 	* Switching PHP versions
 	* Starting and stoping MySQL and PostgreSQL
 	* Starting and stoping Apache
-* Version 3.0
+* Version 4.0
 
 ## Scripts
 
@@ -51,41 +51,48 @@ Add this line
 
 ## Changelog ##
 
+### 4.0
+* Changed dev env install to use the new `brew services` command.
+* Modified `server` script to use the new `brew services` command.
+* Rewrite of the documentation.
+* Removed PHP 5.5 support.
+* `mysql fullstatus` now requires you to enter password, no longer stored.
+
 ### 3.3
-* Added ability to show server statuses 
-* Fixed typos in readme file
+* Added ability to show server statuses.
+* Fixed typos in readme file.
 
 ### 3.2.2
-* Fixed typos
+* Fixed typos.
 
 ### 3.2
-* Added more functions to server
-* Switched postgres to use pg_ctl due to server locks
-* Added myzsh config
+* Added more functions to server.
+* Switched postgres to use pg_ctl due to server locks.
+* Added myzsh config.
 
 ### 3.1.3
 * Cleaning up configuration file.
-* Changing MySQL to version 5.5 for client compatability
+* Changing MySQL to version 5.5 for client compatability.
 
 ### 3.1.2
 * Cleaning up configuration file.
-* Update OSX install guide to fix 10.10.2 issues
+* Update OSX install guide to fix 10.10.2 issues.
 
 ### 3.1.1
 * Added, Updated, and fixed typos in documentation.
-* Refined shell script functions
+* Refined shell script functions.
 
 ### 3.1
-* Moved to OSX Yosemite
-* Dev setup is now based on <a href="https://echo.co/blog/os-x-1010-yosemite-local-development-environment-apache-php-and-mysql-homebrew" target="_blank">ALAN IVEY's setup</a>
+* Moved to OSX Yosemite.
+* Dev setup is now based on <a href="https://echo.co/blog/os-x-1010-yosemite-local-development-environment-apache-php-and-mysql-homebrew" target="_blank">ALAN IVEY's setup</a>.
 * Adding my setup script. 
-	* This is Alan's instructions modified with my unique requirements
+	* This is Alan's instructions modified with my unique requirements.
 
 ### 2.1
-* Removed PHP 5.2 support
+* Removed PHP 5.2 support.
 
 ### 2.0
-* Changes for OSX Mavericks and Homebrew development environment
+* Changes for OSX Mavericks and Homebrew development environment.
 
 ### 1.0 ###
 * This is the initial version of the plugin.
